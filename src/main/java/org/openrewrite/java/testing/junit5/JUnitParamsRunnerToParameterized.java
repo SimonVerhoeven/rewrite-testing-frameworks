@@ -268,9 +268,9 @@ public class JUnitParamsRunnerToParameterized extends Recipe {
         private J.Annotation maybeReplaceTestAnnotation(J.Annotation anno, @Nullable String parameterizedTestArgument) {
             if (JUPITER_TEST_ANNOTATION_MATCHER.matches(anno) || JUNIT_TEST_ANNOTATION_MATCHER.matches(anno)) {
                 if (parameterizedTestArgument == null) {
-                    anno = anno.withTemplate(parameterizedTestTemplate, getCursor(), anno.getCoordinates().replace());
+                    anno = parameterizedTestTemplate.apply(getCursor().attach(anno), anno.getCoordinates().replace());
                 } else {
-                    anno = anno.withTemplate(parameterizedTestTemplateWithName, getCursor(), anno.getCoordinates().replace(), parameterizedTestArgument);
+                    anno = parameterizedTestTemplateWithName.apply(getCursor().attach(anno), anno.getCoordinates().replace(), parameterizedTestArgument);
                 }
             }
             return anno;
@@ -280,11 +280,11 @@ public class JUnitParamsRunnerToParameterized extends Recipe {
             if (PARAMETERS_MATCHER.matches(annotation)) {
                 String initMethodName = junitParamsDefaultInitMethodName(methodName);
                 if (initMethods.contains(initMethodName)) {
-                    annotation = annotation.withTemplate(methodSourceTemplate, getCursor(), annotation.getCoordinates().replace(), "\"" + initMethodName + "\"");
+                    annotation = methodSourceTemplate.apply(getCursor().attach(annotation), annotation.getCoordinates().replace(), "\"" + initMethodName + "\"");
                 } else {
                     String annotationArg = getAnnotationArgumentValueForMethodTemplate(annotation);
                     if (annotationArg != null) {
-                        annotation = annotation.withTemplate(methodSourceTemplate, getCursor(), annotation.getCoordinates().replace(), annotationArg);
+                        annotation = methodSourceTemplate.apply(getCursor().attach(annotation), annotation.getCoordinates().replace(), annotationArg);
                     }
                 }
             }

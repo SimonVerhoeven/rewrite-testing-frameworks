@@ -95,7 +95,7 @@ public class RunnerToExtension extends Recipe {
                 for (String runner : runners) {
                     //noinspection ConstantConditions
                     for (J.Annotation runWith : FindAnnotations.find(classDecl.withBody(null), "@org.junit.runner.RunWith(" + runner + ".class)")) {
-                        cd = cd.withTemplate(getExtendsWithTemplate(ctx),
+                        cd = getExtendsWithTemplate(ctx).apply(
                                 getCursor(),
                                 runWith.getCoordinates().replace(),
                                 extensionType.getClassName());
@@ -115,7 +115,7 @@ public class RunnerToExtension extends Recipe {
 
                 for (String runner : runners) {
                     for (J.Annotation runWith : FindAnnotations.find(method.withBody(null), "@org.junit.runner.RunWith(" + runner + ".class)")) {
-                        md = md.withTemplate(getExtendsWithTemplate(ctx),
+                        md = getExtendsWithTemplate(ctx).apply(
                                 getCursor(),
                                 runWith.getCoordinates().replace(),
                                 extensionType.getClassName());

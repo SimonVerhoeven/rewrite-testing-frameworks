@@ -97,14 +97,12 @@ public class UpdateMockWebServer extends Recipe {
                             if (afterEachMethod == null) {
                                 final String closeMethod = "@AfterEach\nvoid afterEachTest() throws IOException {#{any(okhttp3.mockwebserver.MockWebServer)}.close();\n}";
                                 J.Block body = cd.getBody();
-                                body = maybeAutoFormat(body, body.withTemplate(JavaTemplate.builder(closeMethod)
-                                                        .context(getCursor())
-                                                        .imports(AFTER_EACH_FQN, MOCK_WEB_SERVER_FQN, IO_EXCEPTION_FQN)
-                                                        .javaParser(javaParser(ctx))
-                                                        .build(),
-                                                getCursor(),
-                                                body.getCoordinates().lastStatement(),
-                                                mockWebServerVariable),
+                                body = maybeAutoFormat(body, JavaTemplate.builder(closeMethod)
+                                                .contextSensitive()
+                                                .imports(AFTER_EACH_FQN, MOCK_WEB_SERVER_FQN, IO_EXCEPTION_FQN)
+                                                .javaParser(javaParser(ctx))
+                                                .build()
+                                                .apply(getCursor().attach(body), body.getCoordinates().lastStatement(), mockWebServerVariable),
                                         ctx);
                                 cd = cd.withBody(body);
                                 maybeAddImport(AFTER_EACH_FQN);
@@ -115,15 +113,16 @@ public class UpdateMockWebServer extends Recipe {
                                     if (statement == afterEachMethod) {
                                         J.MethodDeclaration method = (J.MethodDeclaration) statement;
                                         if (method.getBody() != null) {
-                                            method = method.withTemplate(
-                                                    JavaTemplate.builder("#{any(okhttp3.mockwebserver.MockWebServer)}.close();")
-                                                            .context(getCursor())
-                                                            .imports(AFTER_EACH_FQN, MOCK_WEB_SERVER_FQN, IO_EXCEPTION_FQN)
-                                                            .javaParser(javaParser(ctx))
-                                                            .build(),
-                                                    getCursor(),
-                                                    method.getBody().getCoordinates().lastStatement(),
-                                                    mockWebServerVariable);
+                                            method = JavaTemplate.builder("#{any(okhttp3.mockwebserver.MockWebServer)}.close();")
+                                                    .contextSensitive()
+                                                    .imports(AFTER_EACH_FQN, MOCK_WEB_SERVER_FQN, IO_EXCEPTION_FQN)
+                                                    .javaParser(javaParser(ctx))
+                                                    .build()
+                                                    .apply(
+                                                            getCursor().attach(method),
+                                                            method.getBody().getCoordinates().lastStatement(),
+                                                            mockWebServerVariable
+                                                    );
 
                                             if (method.getThrows() == null || method.getThrows().stream()
                                                     .noneMatch(n -> TypeUtils.isOfClassType(n.getType(), IO_EXCEPTION_FQN))) {

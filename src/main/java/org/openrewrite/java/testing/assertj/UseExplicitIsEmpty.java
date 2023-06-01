@@ -99,15 +99,11 @@ public class UseExplicitIsEmpty extends Recipe {
 
             String template = isTrue ? "assertThat(#{any()}).isEmpty();" :
                     "assertThat(#{any()}).isNotEmpty();";
-            JavaTemplate builtTemplate = JavaTemplate.builder(template)
-                    .context(this::getCursor)
+            return JavaTemplate.builder(template)
+                    .contextSensitive()
                     .javaParser(assertionsParser(ctx))
-                    .build();
-            return method.withTemplate(
-                    builtTemplate,
-                    getCursor(),
-                    method.getCoordinates().replace(),
-                    collection);
+                    .build()
+                    .apply(getCursor(), method.getCoordinates().replace(), collection);
         }
     }
 }

@@ -93,16 +93,11 @@ public class UseExplicitContains extends Recipe {
 
             String template = isTrue ? "assertThat(#{any()}).contains(#{any()});" :
                     "assertThat(#{any()}).doesNotContain(#{any()});";
-            JavaTemplate builtTemplate = JavaTemplate.builder(template)
-                    .context(getCursor())
+            return JavaTemplate.builder(template)
+                    .contextSensitive()
                     .javaParser(assertionsParser(ctx))
-                    .build();
-            return method.withTemplate(
-                    builtTemplate,
-                    getCursor(),
-                    method.getCoordinates().replace(),
-                    list,
-                    element);
+                    .build()
+                    .apply(getCursor(), method.getCoordinates().replace(), list, element);
         }
     }
 }

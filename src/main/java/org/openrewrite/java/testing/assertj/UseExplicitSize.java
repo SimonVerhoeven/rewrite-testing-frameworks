@@ -90,15 +90,11 @@ public class UseExplicitSize extends Recipe {
             Expression expectedSize = method.getArguments().get(0);
 
             String template = "assertThat(#{any(java.util.List)}).hasSize(#{any()});";
-            return method.withTemplate(
-                    JavaTemplate.builder(template)
-                            .context(getCursor())
-                            .javaParser(assertionsParser(ctx))
-                            .build(),
-                    getCursor(),
-                    method.getCoordinates().replace(),
-                    list,
-                    expectedSize);
+            return JavaTemplate.builder(template)
+                    .contextSensitive()
+                    .javaParser(assertionsParser(ctx))
+                    .build()
+                    .apply(getCursor(), method.getCoordinates().replace(), list, expectedSize);
         }
     }
 }

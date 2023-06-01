@@ -196,7 +196,7 @@ public class ParameterizedRunnerToParameterized extends Recipe {
 
             // build init-method with parameters template
             this.initMethodStatementTemplate = JavaTemplate.builder(initMethodName + "(#{});")
-                    .context(this::getCursor)
+                    .contextSensitive()
                     .javaParser(javaParserBuilder)
                     .build();
 
@@ -219,7 +219,7 @@ public class ParameterizedRunnerToParameterized extends Recipe {
 
                 initMethodTemplate.append("}");
                 this.initMethodDeclarationTemplate = JavaTemplate.builder(initMethodTemplate.toString())
-                        .context(this::getCursor)
+                        .contextSensitive()
                         .javaParser(javaParserBuilder)
                         .build();
             } else {
@@ -256,8 +256,7 @@ public class ParameterizedRunnerToParameterized extends Recipe {
 
 
             if (initMethodDeclarationTemplate != null) {
-                cd = cd.withBody(cd.getBody().withTemplate(initMethodDeclarationTemplate, getCursor(),
-                        cd.getBody().getCoordinates().lastStatement()));
+                cd = initMethodDeclarationTemplate.apply(getCursor(), cd.getBody().getCoordinates().lastStatement());
                 J.Block finalBody = cd.getBody();
                 cd = cd.withBody(cd.getBody().withStatements(ListUtils.map(cd.getBody().getStatements(), stmt -> {
                     if (stmt instanceof J.MethodDeclaration) {
@@ -323,10 +322,10 @@ public class ParameterizedRunnerToParameterized extends Recipe {
                 if (JUPITER_TEST.matches(annotation) || JUNIT_TEST.matches(annotation)) {
                     List<Comment> annotationComments = annotation.getComments();
                     if (parameterizedTestAnnotationParameters == null) {
-                        annotation = annotation.withTemplate(parameterizedTestTemplate, getCursor(),
+                        annotation = parameterizedTestTemplate.apply(getCursor().attach(annotation),
                                 annotation.getCoordinates().replace());
                     } else {
-                        annotation = annotation.withTemplate(parameterizedTestTemplate, getCursor(),
+                        annotation = parameterizedTestTemplate.apply(getCursor().attach(annotation),
                                 annotation.getCoordinates().replace(), parameterizedTestAnnotationParameters.get(0));
                     }
                     if (!annotationComments.isEmpty()) {
@@ -338,11 +337,11 @@ public class ParameterizedRunnerToParameterized extends Recipe {
 
             // Add @MethodSource, insert test init statement, add test method parameters
             if (m.getLeadingAnnotations().stream().anyMatch(PARAMETERIZED_TEST::matches)) {
-                m = m.withTemplate(methodSourceTemplate, getCursor(),
+                m = methodSourceTemplate.apply(getCursor(),
                         m.getCoordinates().addAnnotation(Comparator.comparing(J.Annotation::getSimpleName)));
                 assert m.getBody() != null;
                 JavaCoordinates newStatementCoordinates = !m.getBody().getStatements().isEmpty() ? m.getBody().getStatements().get(0).getCoordinates().before() : m.getBody().getCoordinates().lastStatement();
-                m = m.withTemplate(initMethodStatementTemplate, getCursor(), newStatementCoordinates, initStatementParamString);
+                m = initMethodStatementTemplate.apply(getCursor(), newStatementCoordinates, initStatementParamString);
                 m = maybeAutoFormat(m, m.withParameters(parameterizedTestMethodParameters), m.getName(), ctx, getCursor().getParentTreeCursor());
             }
 

@@ -69,11 +69,12 @@ public class UseTestMethodOrder extends Recipe {
                     maybeRemoveImport("org.junit.FixMethodOrder");
                     maybeRemoveImport("org.junit.runners.MethodSorters");
 
-                    c = c.withTemplate(JavaTemplate.builder("@TestMethodOrder(MethodName.class)")
+                    c = JavaTemplate.builder("@TestMethodOrder(MethodName.class)")
                             .javaParser(javaParser(ctx))
                             .imports("org.junit.jupiter.api.TestMethodOrder",
                                     "org.junit.jupiter.api.MethodOrderer.*")
-                            .build(), getCursor(), methodOrders.iterator().next().getCoordinates().replace());
+                            .build()
+                            .apply(getCursor(), methodOrders.iterator().next().getCoordinates().replace());
                     maybeAddImport("org.junit.jupiter.api.MethodOrderer.MethodName");
                 }
 

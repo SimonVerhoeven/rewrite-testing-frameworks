@@ -75,15 +75,12 @@ public class JUnitAssertThrowsToAssertExceptionType extends Recipe {
                 }
 
                 if (executable != null) {
-                    mi = mi.withTemplate(
-                            JavaTemplate
-                                    .builder("assertThatExceptionOfType(#{any(java.lang.Class)}).isThrownBy(#{any(org.assertj.core.api.ThrowableAssert.ThrowingCallable)})")
-                                    .javaParser(assertionsParser(ctx))
-                                    .staticImports("org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType")
-                                    .build(),
-                            getCursor(),
-                            mi.getCoordinates().replace(),
-                            mi.getArguments().get(0), executable);
+                    mi = JavaTemplate
+                            .builder("assertThatExceptionOfType(#{any(java.lang.Class)}).isThrownBy(#{any(org.assertj.core.api.ThrowableAssert.ThrowingCallable)})")
+                            .javaParser(assertionsParser(ctx))
+                            .staticImports("org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType")
+                            .build()
+                            .apply(getCursor(), mi.getCoordinates().replace(), mi.getArguments().get(0), executable);
                     maybeAddImport("org.assertj.core.api.AssertionsForClassTypes", "assertThatExceptionOfType");
                     maybeRemoveImport("org.junit.jupiter.api.Assertions.assertThrows");
                 }
